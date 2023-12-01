@@ -9,7 +9,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Make a `config.py` file in root folder, and create `Config` class inheriting from `ConfigBase` class in `config_base.py`.
+
 # Run
 ```bash
-python3 app.py
+python3 run.py
 ```
