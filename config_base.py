@@ -3,3 +3,5 @@ class ConfigBase(object):
     TESTING = False
     SECRET_KEY = ""
     REDIS_URL = ""
+
+    NOTES_LOCATION = ""
