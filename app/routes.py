@@ -3,11 +3,13 @@ import time
 import os
 
 from flask import render_template
-from app import app, redis_store
+from app import app
+from app.data_store import DataStore
 
 
 def long_running_task():
-    redis_store.set("reading_notes", "true")  # race condition here
+    DataStore.set_reading_notes(True)  # race condition here
+
     try:
         notes_location = app.config["NOTES_LOCATION"]
 
@@ -15,33 +17,27 @@ def long_running_task():
             print("Notes location is not a directory")
             return
 
-        redis_store.delete("notes")
+        DataStore.delete_notes()
 
         for filename in os.listdir(notes_location):
             if os.path.isfile(os.path.join(notes_location, filename)):
-                redis_store.lpush("notes", filename)
+                DataStore.add_notes(filename)
 
     except Exception as e:
         print(e)
     finally:
-        redis_store.set("reading_notes", "false")
+        DataStore.set_reading_notes(False)
     return
 
 
 @app.route("/")
 def home():
-    if redis_store.get("reading_notes") is None:
-        redis_store.set("reading_notes", "false")
-
-    if (
-        redis_store.llen("notes") == 0
-        and redis_store.get("reading_notes").decode("utf-8") == "false"
-    ):
+    if DataStore.get_notes_count() == 0 and DataStore.get_reading_notes() == False:
         print("starting task")
         task_thread = threading.Thread(target=long_running_task)
         task_thread.start()
 
-    is_loading = redis_store.get("reading_notes").decode("utf-8") == "true"
-    note_count = redis_store.llen("notes")
+    is_loading = DataStore.get_reading_notes()
+    note_count = DataStore.get_notes_count()
 
     return render_template("home.html", is_loading=is_loading, note_count=note_count)
