@@ -19,8 +19,12 @@ class DataStore:
 
     @classmethod
     def initialize(cls):
+        if cls.redis_store.exists("flaskidian_initialized"):
+            return
         cls.redis_store.set("reading_notes", "false")
         cls.redis_store.delete("notes")
+        cls.redis_store.set("flaskidian_initialized", "true")
+        print("Initialized Flaskidian data store in Redis")
 
     @classmethod
     def get_reading_notes(cls):

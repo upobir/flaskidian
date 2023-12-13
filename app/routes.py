@@ -3,7 +3,9 @@ import time
 import os
 
 from flask import render_template
-from app import app
+from flask_restful import Resource
+
+from app import app, api
 from app.data_store import DataStore
 
 
@@ -41,3 +43,11 @@ def home():
     note_count = DataStore.get_notes_count()
 
     return render_template("home.html", is_loading=is_loading, note_count=note_count)
+
+
+class Notes(Resource):
+    def get(self):
+        return [], 200
+
+
+api.add_resource(Notes, "/api/notes")
